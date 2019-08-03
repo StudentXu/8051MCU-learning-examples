@@ -1,0 +1,92 @@
+C51 COMPILER V9.00   MAIN                                                                  05/29/2015 15:25:34 PAGE 1   
+
+
+C51 COMPILER V9.00, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN main.OBJ
+COMPILER INVOKED BY: e:\Keil\C51\BIN\C51.EXE main.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include<reg51.h>
+   2          #include <stdio.h>
+   3          #include<string.h>
+   4          #define uchar unsigned char 
+   5          #define uint unsigned int
+   6          void Initialize_LCD();   //LCD初始化函数
+   7          void DelayMS(uint ms);   //延时函数
+   8          void ShowString(uchar,uchar,uchar *); //字符串显示函数
+   9          sbit CLK=P1^3;          //时钟信号
+  10          sbit ST=P1^2;           //启动信号
+  11          sbit EOC=P1^1;          //转换结束信号
+  12          sbit OE=P1^0;           //输出使能
+  13          sbit SPK=P2^3;          //蜂鸣器
+  14          sbit QP=P1^4;           //去皮键
+  15          
+  16          uchar  Prompt[16];
+  17          //显示缓冲（2行）
+  18          uchar Disp_Buffer[32];
+  19          
+  20          //主程序
+  21          void main()
+  22          {
+  23   1              double zong=0;
+  24   1              double Count=0;
+  25   1              double pi=0x00;
+  26   1              double jing=0;
+  27   1              //定时器初始化
+  28   1              TMOD=0x02;              //T1工作模式2
+  29   1              TH0=0x14;               //设定定时器初值
+  30   1              TL0=0x00;
+  31   1              IE=0x82;                //设置优先级
+  32   1              TR0=1;                  //设置出发方式
+  33   1              //初始化LCD
+  34   1              Initialize_LCD();                
+  35   1      
+  36   1              while(1)
+  37   1              {
+  38   2                      SPK=0;
+  39   2                      OE=0;
+  40   2                      ST=0;ST=1;ST=0;         //启动A/D转换
+  41   2                      while(EOC==0);          //等待转换完成
+  42   2                      OE=1;           
+  43   2                      if(QP==0)
+  44   2                      {       
+  45   3                              pi=P3;                                                          //记下皮的重量
+  46   3                      }
+  47   2                      zong=P3;                                                                //记下总质量
+  48   2                      jing=zong-pi;                                                   //去皮计算
+  49   2                      if(zong>=250)
+  50   2                      {       
+  51   3                              sprintf(Prompt,"----warnning----");     //超重显示错误
+  52   3                              SPK=1;
+  53   3                      }
+  54   2                      else
+  55   2                      sprintf(Prompt,"Quality:%3.1f kg",(jing-2)/59);   //显示重量
+C51 COMPILER V9.00   MAIN                                                                  05/29/2015 15:25:34 PAGE 2   
+
+  56   2                      ShowString(0,0,Prompt);
+  57   2                      ShowString(0,1,Prompt+16);
+  58   2              }
+  59   1      }
+  60          //T0定时器中断给ADC0808提供时钟信号
+  61          void Timer0_INT() interrupt 1
+  62          {
+  63   1              TH0=0x14;               
+  64   1              TL0=0x00;
+  65   1              CLK=~CLK;
+  66   1      }
+  67          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    246    ----
+   CONSTANT SIZE    =     34    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     48      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
